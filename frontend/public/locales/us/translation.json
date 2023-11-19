@@ -1,0 +1,8 @@
+{
+  "user": "User",
+  "fullname": "Full Name",
+  "email": "E-Mail",
+  "password": "Password",
+  "signin": "Sign-in",
+  "signup": "Sign-up"
+}

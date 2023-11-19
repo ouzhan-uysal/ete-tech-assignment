@@ -1,0 +1,8 @@
+{
+  "user": "Kullanıcı",
+  "fullname": "Adınız ve Soyadınız",
+  "email": "E-Posta",
+  "password": "Şifre",
+  "signin": "Giriş Yap",
+  "signup": "Üye Ol"
+}
