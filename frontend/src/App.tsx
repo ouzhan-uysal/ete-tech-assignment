@@ -19,9 +19,6 @@ function App() {
   )
     : (
       <Routes>
-        <Route path="/dashboard" element={<HOME />} />
-        <Route path="/companies" element={<COMPANIES />} />
-        <Route path="/products" element={<PRODUCTS />} />
         <Route index element={<WELCOME />} />
         <Route path="*" element={<WELCOME />} />
       </Routes>

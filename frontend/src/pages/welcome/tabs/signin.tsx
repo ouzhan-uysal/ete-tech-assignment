@@ -32,12 +32,16 @@ const SigninTab = () => {
   }
 
   const handleLoginRequest = async () => {
-    await MutationRequest(`mutation {}`).then(res => {
-      handleLogin({
-        email: res.data.email,
-        fullName: res.data.fullName
-      })
-    }).catch(err => console.error("signin err: ", err));
+    handleLogin({
+      email: "ouz@gmail.com",
+      fullName: "ouz"
+    })
+    // await MutationRequest(`mutation {}`).then(res => {
+    //   handleLogin({
+    //     email: res.data.email,
+    //     fullName: res.data.fullName
+    //   })
+    // }).catch(err => console.error("signin err: ", err));
   }
 
   return (

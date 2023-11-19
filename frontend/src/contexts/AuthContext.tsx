@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { IAuthContext, IAuthContextProvider } from "../types/auth.interface";
 import { IUser } from "../types/auth.interface";
 import Cookies from "js-cookie";
+import useApollo from "../hooks/useApollo";
 
 const AuthContext = createContext<IAuthContext>({
   user: null,
@@ -11,11 +12,10 @@ const AuthContext = createContext<IAuthContext>({
 });
 
 export const AuthContextProvider: FC<IAuthContextProvider> = ({ children }) => {
-  const [user, setUser] = useState<IUser | null>({
-    email: "xx",
-    fullName: "yy"
-  });
+  const [user, setUser] = useState<IUser | null>(null);
+  const { QueryRequest } = useApollo();
   const navigate = useNavigate();
+  console.log("user: ", user);
 
 
   const handleLogin = async (user: IUser) => {
