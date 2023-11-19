@@ -1,0 +1,32 @@
+type User {
+  _id: String!
+  username: String
+  email: String
+  password: String
+  createdAt: Float
+  access_token: String
+}
+
+input SignupInput {
+  username: String!
+  email: String!
+  password: String!
+}
+
+input SigninInput {
+  email: String!
+  password: String!
+}
+
+input JwtCheckInput {
+  refresh_token: String!
+}
+
+type Query {
+  jwtCheck: User
+}
+
+type Mutation {
+  signin(input: SigninInput!): User
+  signup(input: SignupInput!): User
+}

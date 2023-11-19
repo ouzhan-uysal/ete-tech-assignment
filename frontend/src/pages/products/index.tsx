@@ -49,6 +49,7 @@ const Companies = () => {
     show: boolean;
     loading: boolean;
   }>({ show: false, loading: false });
+  const [search, setSearch] = useState<string>('');
   const [data, setData] = useState<Array<{
     key: string;
     name: string;
@@ -99,11 +100,14 @@ const Companies = () => {
       <div className="home-container">
         <h2>Products</h2>
         <Row gutter={[24, 24]} >
-          <Col span={24} style={{ textAlign: 'end' }}>
+          <Col span={12} style={{ textAlign: 'start' }}>
+            <Input.Search placeholder="Search by product name" value={search} onChange={(e) => setSearch(e.target.value)} style={{ width: 200 }} />
+          </Col>
+          <Col span={12} style={{ textAlign: 'end' }}>
             <Button onClick={() => setModal(prev => ({ ...prev, show: true }))}>Create New Product</Button>
           </Col>
           <Col span={24}>
-            <Table dataSource={data} columns={columns} pagination={{ pageSize: 3 }} />
+            <Table dataSource={data.filter(elm => elm.name.toUpperCase().includes(search.toUpperCase()))} columns={columns} pagination={{ pageSize: 3 }} />
           </Col>
           <Col span={24}>
             <CustomButton bgColor="darkgreen" name="Back" type="button" onClick={() => navigate('/dashboard')} />
