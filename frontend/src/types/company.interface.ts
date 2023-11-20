@@ -4,4 +4,5 @@ export interface ICompany {
   legalNo: number;
   incorporationCountry: string;
   website: string;
+  createdAt: number;
 }

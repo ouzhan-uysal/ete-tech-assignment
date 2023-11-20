@@ -5,6 +5,7 @@ type Company {
   legalNo: Float!
   incorporationCountry: String!
   website: String!
+  createdAt: Float!
 }
 
 input CreateCompanyInput {

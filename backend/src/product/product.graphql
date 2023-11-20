@@ -6,6 +6,8 @@ type Product {
   amount: Float!
   unit: String!
   company: String!
+  companyId: String!
+  createdAt: Float!
 }
 
 input CreateProductInput {
@@ -13,7 +15,7 @@ input CreateProductInput {
   category: String!
   amount: Float!
   unit: String!
-  company: String!
+  companyId: String!
 }
 
 input DeleteProductInput {
@@ -26,5 +28,5 @@ type Query {
 
 type Mutation {
   createProduct(input: CreateProductInput!): Product
-  deleteProduct(input: DeleteProductInput!): Product
+  deleteProduct(input: DeleteProductInput!): Boolean
 }

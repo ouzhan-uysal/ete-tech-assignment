@@ -53,11 +53,6 @@ export const productTableColumns = [
     key: 'company',
   },
   {
-    title: 'Edit',
-    dataIndex: 'edit',
-    key: 'edit',
-  },
-  {
     title: 'Delete',
     dataIndex: 'delete',
     key: 'delete',

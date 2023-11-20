@@ -1,35 +1,26 @@
-import { createSlice } from '@reduxjs/toolkit'
-import type { PayloadAction } from '@reduxjs/toolkit'
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { ICompany } from "../../types/company.interface";
 
-export interface CounterState {
-  value: number
+const initialState: { companies: Array<ICompany> } = {
+  companies: []
 }
 
-const initialState: CounterState = {
-  value: 0,
-}
-
-export const counterSlice = createSlice({
-  name: 'counter',
+const companySlice = createSlice({
+  name: 'companies',
   initialState,
   reducers: {
-    increment: (state) => {
-      // Redux Toolkit allows us to write "mutating" logic in reducers. It
-      // doesn't actually mutate the state because it uses the Immer library,
-      // which detects changes to a "draft state" and produces a brand new
-      // immutable state based off those changes
-      state.value += 1
+    setState: (state, action: PayloadAction<Array<ICompany>>) => {
+      state.companies = action.payload.sort((a, b) => b.createdAt - a.createdAt);
     },
-    decrement: (state) => {
-      state.value -= 1
+    addCompany: (state, action: PayloadAction<ICompany>) => {
+      state.companies.push(action.payload);
     },
-    incrementByAmount: (state, action: PayloadAction<number>) => {
-      state.value += action.payload
+    deleteCompany: (state, action: PayloadAction<{ companyId: string }>) => {
+      state.companies = state.companies.filter(company => company._id.toLowerCase() !== action.payload.companyId.toLowerCase())
     },
-  },
-})
+  }
+});
 
-// Action creators are generated for each case reducer function
-export const { increment, decrement, incrementByAmount } = counterSlice.actions
+export const { setState, addCompany, deleteCompany } = companySlice.actions;
 
-export default counterSlice.reducer
+export default companySlice.reducer;

@@ -1,79 +1,49 @@
 import CustomButton from '../../components/custom/Button';
 import { useNavigate } from 'react-router-dom';
 import { Button, Col, Input, Modal, Row, Table } from 'antd';
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import useApollo from '../../hooks/useApollo';
 import { ICompany } from '../../types/company.interface';
 import { companyTableColumns } from '../../constants/tableColumns';
-
-interface ITableCompany extends ICompany {
-  key: string;
-  delete: JSX.Element;
-}
+import { useAppDispatch, useAppSelector } from '../../redux/store';
+import { addCompany, setState } from '../../redux/features/companies';
 
 const Companies = () => {
   const navigate = useNavigate();
-  const { QueryRequest, MutationRequest } = useApollo();
+  const { MutationRequest } = useApollo();
+  const { companies } = useAppSelector((state) => state.companies);
+  const dispatch = useAppDispatch();
   const [modal, setModal] = useState<{
     show: boolean;
     loading: boolean;
   }>({ show: false, loading: false });
-  const [fields, setFields] = useState<{
-    name: string;
-    legalNo: number;
-    incorporationCountry: string;
-    website: string;
-  }>({
+  const [fields, setFields] = useState<ICompany>({
+    _id: "",
     name: "",
     legalNo: 0,
     incorporationCountry: "",
     website: "",
+    createdAt: 0
   });
   const [search, setSearch] = useState<string>('');
-  const [data, setData] = useState<Array<ITableCompany>>([]);
-
-  const handleFetchCompanies = useCallback(async () => {
-    await QueryRequest(`query {
-      getMyCompanies{_id name legalNo incorporationCountry website}
-    }`).then(res => {
-      if (res.data.getMyCompanies) {
-        setData(res.data.getMyCompanies.map((elm: ICompany) => ({
-          key: elm._id,
-          name: elm.name,
-          legalNo: elm.legalNo,
-          incorporationCountry: elm.incorporationCountry,
-          website: elm.website,
-          delete: <Button onClick={() => deleteCompany(elm._id)}>Delete</Button>,
-        })));
-      }
-    }).catch(err => console.error("getMyCompanies err: ", err));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    handleFetchCompanies();
-    return () => { }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   const handleCreateCompany = async () => {
     setModal(prev => ({ ...prev, loading: true }));
     await MutationRequest(`mutation {
       createCompany(
         input: { name: "${fields.name}", legalNo: ${fields.legalNo}, incorporationCountry: "${fields.incorporationCountry}", website: "${fields.website}" }
-      ) {_id name legalNo incorporationCountry website}
+      ) {_id name legalNo incorporationCountry website createdAt}
     }`)
       .then(res => {
         if (res.data.createCompany?._id) {
-          setData(prev => ([...prev, {
+          dispatch(addCompany({
             _id: res.data.createCompany._id,
-            key: res.data.createCompany._id,
             name: res.data.createCompany.name,
             legalNo: res.data.createCompany.legalNo,
             incorporationCountry: res.data.createCompany.incorporationCountry,
             website: res.data.createCompany.website,
-            delete: <Button onClick={() => deleteCompany(res.data.createCompany._id)}>Delete</Button>,
-          }]))
+            createdAt: res.data.createCompany.createdAt
+          }))
         }
       })
       .catch(err => console.error("createCompany err: ", err));
@@ -84,7 +54,12 @@ const Companies = () => {
     await MutationRequest(`mutation {
       deleteCompany(input: { companyId: "${companyId}" })
     }`)
-      .then(res => res.data.deleteCompany && setData(prev => prev.filter(company => company.key.toLowerCase() !== companyId.toLowerCase())))
+      .then(res => {
+        if (res.data.deleteCompany) {
+          const tempArr = companies.filter(company => company._id.toLowerCase() !== companyId.toLowerCase());
+          dispatch(setState(tempArr))
+        }
+      }) // dispatch(deleteCompany({ companyId }))
       .catch(err => console.error("deleteCompany err: ", err));
   }
 
@@ -100,10 +75,14 @@ const Companies = () => {
             <Button onClick={() => setModal(prev => ({ ...prev, show: true }))}>Create New Company</Button>
           </Col>
           <Col span={24}>
-            <Table dataSource={data.filter(elm => elm.name.toUpperCase().includes(search.toUpperCase()))} columns={companyTableColumns} pagination={{ pageSize: 3 }} scroll={{ x: true }} />
+            <Table dataSource={companies.map(company => ({
+              ...company,
+              key: company._id,
+              delete: <Button onClick={() => deleteCompany(company._id)}>Delete</Button>,
+            })).filter(elm => elm.name.toUpperCase().includes(search.toUpperCase()))} columns={companyTableColumns} pagination={{ pageSize: 3 }} scroll={{ x: true }} />
           </Col>
           <Col span={24}>
-            <CustomButton bgColor="darkgreen" name="Back" type="button" onClick={() => navigate('/dashboard')} />
+            <CustomButton bgColor="blue" name="Back" type="button" onClick={() => navigate('/dashboard')} />
           </Col>
         </Row>
       </div>

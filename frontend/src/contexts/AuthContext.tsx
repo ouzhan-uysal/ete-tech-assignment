@@ -4,6 +4,9 @@ import { IAuthContext, IAuthContextProvider } from "../types/auth.interface";
 import { IUser } from "../types/auth.interface";
 import Cookies from "js-cookie";
 import useApollo from "../hooks/useApollo";
+import { useAppDispatch } from "../redux/store";
+import { setState } from "../redux/features/companies";
+import { ICompany } from "../types/company.interface";
 
 const AuthContext = createContext<IAuthContext>({
   user: null,
@@ -15,8 +18,27 @@ export const AuthContextProvider: FC<IAuthContextProvider> = ({ children }) => {
   const [user, setUser] = useState<IUser | null>(null);
   const { QueryRequest } = useApollo();
   const navigate = useNavigate();
-  console.log("user: ", user);
+  const dispatch = useAppDispatch();
 
+  const handleFetchCompanies = useCallback(async () => {
+    await QueryRequest(`query {
+      getMyCompanies{_id name legalNo incorporationCountry website createdAt}
+    }`).then(res => {
+      if (res.data.getMyCompanies) {
+        dispatch(setState(
+          res.data.getMyCompanies.map((elm: ICompany) => ({
+            _id: elm._id,
+            name: elm.name,
+            legalNo: elm.legalNo,
+            incorporationCountry: elm.incorporationCountry,
+            website: elm.website,
+            createdAt: elm.createdAt,
+          }))
+        ))
+      }
+    }).catch(err => console.error("getMyCompanies err: ", err));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleLogin = async (user: IUser) => {
     setUser(user);
@@ -26,12 +48,14 @@ export const AuthContextProvider: FC<IAuthContextProvider> = ({ children }) => {
 
   const handleLogout = () => {
     setUser(null);
+    Cookies.remove("ete-token");
     navigate('/');
   };
 
   const handleCheckUser = useCallback(async () => {
     const jwt = Cookies.get('ete-token');
     if (user) {
+      handleFetchCompanies();
       Cookies.set('ete-token', user.access_token);
     } else if (jwt && jwt !== 'undefined') {
       await QueryRequest(`query {
@@ -39,15 +63,17 @@ export const AuthContextProvider: FC<IAuthContextProvider> = ({ children }) => {
       		_id
       		username
       		email
-      		createdAt
-      		password
       	}
       }`)
         .then(async (res) => {
           // console.log('jwtCheck res: ', res);
           const result = res.data.jwtCheck;
           if (result) {
-            setUser({ ...result, access_token: jwt });
+            setUser({
+              email: result.email,
+              fullName: result.username,
+              access_token: jwt
+            });
           }
           // instance.defaults.headers.common[
           // 	'authorization'

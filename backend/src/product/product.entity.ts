@@ -18,5 +18,15 @@ export class Product {
   @Column()
   company: string;
   @Column()
+  companyId: ObjectId;
+  @Column()
   createdAt: number;
+}
+
+export interface IProductCreateInput {
+  name: string;
+  category: string;
+  amount: number;
+  unit: string;
+  companyId: string;
 }

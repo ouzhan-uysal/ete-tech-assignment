@@ -11,6 +11,10 @@ export class CompanyService {
     private companyRepository: MongoRepository<Company>
   ) { }
 
+  async getCompanyById(companyId: string): Promise<Company> {
+    return await this.companyRepository.findOneBy({ _id: new ObjectId(companyId) });
+  }
+
   async getCompaniesByUserId(userId: ObjectId): Promise<Array<Company>> {
     return await this.companyRepository.find({ owner: new ObjectId(userId) })
   }

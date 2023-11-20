@@ -7,6 +7,8 @@ import reportWebVitals from './reportWebVitals';
 import { AuthContextProvider } from './contexts/AuthContext';
 import './i18n';
 import Loader from './components/loader';
+import { Provider } from 'react-redux';
+import { store } from './redux/store';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -14,11 +16,13 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <Router>
-      <AuthContextProvider>
-        <React.Suspense fallback={<Loader />}>
-          <App />
-        </React.Suspense>
-      </AuthContextProvider>
+      <Provider store={store}>
+        <AuthContextProvider>
+          <React.Suspense fallback={<Loader />}>
+            <App />
+          </React.Suspense>
+        </AuthContextProvider>
+      </Provider>
     </Router>
   </React.StrictMode>
 );

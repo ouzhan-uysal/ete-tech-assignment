@@ -25,7 +25,8 @@ export class CompanyResolver {
       owner: new ObjectId(user._id),
       legalNo: input.legalNo,
       incorporationCountry: input.incorporationCountry,
-      website: input.website
+      website: input.website,
+      createdAt: Date.now(),
     });
     return await this.companyService.createCompany(company);
   }
