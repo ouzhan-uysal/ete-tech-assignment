@@ -30,39 +30,33 @@ export const AuthContextProvider: FC<IAuthContextProvider> = ({ children }) => {
   };
 
   const handleCheckUser = useCallback(async () => {
-    const storegedToken = Cookies.get('ete-token');
+    const jwt = Cookies.get('ete-token');
     if (user) {
       Cookies.set('ete-token', user.access_token);
-    } else if (storegedToken && storegedToken !== 'undefined') {
-      // await QueryRequest(`query {
-      // 	jwtCheck {
-      // 		_id
-      // 		username
-      // 		email
-      // 		createdAt
-      // 		password
-      // 		accountLevel
-      // 		type
-      // 		image
-      // 		walletIds
-      // 	}
-      // }`)
-      //   .then(async (res) => {
-      //     // console.log('jwtCheck res: ', res);
-      //     const result = res.data.jwtCheck;
-      //     if (result) {
-      //       setUser({ ...result, access_token: storagedRefreshToken });
-      //       const { data } = await QueryRequest(`query {getAllNetworks{name}}`);
-      //       data && setNetworks(data.getAllNetworks);
-      //     }
-      //     // instance.defaults.headers.common[
-      //     // 	'authorization'
-      //     // ] = `${res.data.access_token}`;
-      //   })
-      //   .catch((err) => {
-      //     console.error('jwtCheck err: ', err);
-      //     handleLogout();
-      //   });
+    } else if (jwt && jwt !== 'undefined') {
+      await QueryRequest(`query {
+      	jwtCheck {
+      		_id
+      		username
+      		email
+      		createdAt
+      		password
+      	}
+      }`)
+        .then(async (res) => {
+          // console.log('jwtCheck res: ', res);
+          const result = res.data.jwtCheck;
+          if (result) {
+            setUser({ ...result, access_token: jwt });
+          }
+          // instance.defaults.headers.common[
+          // 	'authorization'
+          // ] = `${res.data.access_token}`;
+        })
+        .catch((err) => {
+          console.error('jwtCheck err: ', err);
+          handleLogout();
+        });
     } else {
       handleLogout();
     }

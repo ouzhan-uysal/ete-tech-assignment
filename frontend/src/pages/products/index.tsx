@@ -3,44 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Col, Input, Modal, Row, Select, Table } from 'antd';
 import { useEffect, useState } from 'react';
 import useApollo from '../../hooks/useApollo';
+import { productTableColumns } from '../../constants/tableColumns';
 
-const columns = [
-  {
-    title: 'Product Name',
-    dataIndex: 'name',
-    key: 'name',
-  },
-  {
-    title: 'Category',
-    dataIndex: 'category',
-    key: 'category',
-  },
-  {
-    title: 'Amount',
-    dataIndex: 'amount',
-    key: 'amount',
-  },
-  {
-    title: 'Unit',
-    dataIndex: 'unit',
-    key: 'unit',
-  },
-  {
-    title: 'Company',
-    dataIndex: 'company',
-    key: 'company',
-  },
-  {
-    title: 'Edit',
-    dataIndex: 'edit',
-    key: 'edit',
-  },
-  {
-    title: 'Delete',
-    dataIndex: 'delete',
-    key: 'delete',
-  },
-];
 
 const Companies = () => {
   const navigate = useNavigate();
@@ -107,7 +71,7 @@ const Companies = () => {
             <Button onClick={() => setModal(prev => ({ ...prev, show: true }))}>Create New Product</Button>
           </Col>
           <Col span={24}>
-            <Table dataSource={data.filter(elm => elm.name.toUpperCase().includes(search.toUpperCase()))} columns={columns} pagination={{ pageSize: 3 }} />
+            <Table dataSource={data.filter(elm => elm.name.toUpperCase().includes(search.toUpperCase()))} columns={productTableColumns} pagination={{ pageSize: 3 }} scroll={{ x: true }} />
           </Col>
           <Col span={24}>
             <CustomButton bgColor="darkgreen" name="Back" type="button" onClick={() => navigate('/dashboard')} />

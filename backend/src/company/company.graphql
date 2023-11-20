@@ -1,0 +1,28 @@
+type Company {
+  _id: String!
+  owner: String!
+  name: String!
+  legalNo: Float!
+  incorporationCountry: String!
+  website: String!
+}
+
+input CreateCompanyInput {
+  name: String!
+  legalNo: Float!
+  incorporationCountry: String!
+  website: String!
+}
+
+input DeleteCompanyInput {
+  companyId: String!
+}
+
+type Query {
+  getMyCompanies: [Company]
+}
+
+type Mutation {
+  createCompany(input: CreateCompanyInput!): Company
+  deleteCompany(input: DeleteCompanyInput!): Boolean
+}

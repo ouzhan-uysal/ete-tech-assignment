@@ -1,90 +1,91 @@
 import CustomButton from '../../components/custom/Button';
 import { useNavigate } from 'react-router-dom';
 import { Button, Col, Input, Modal, Row, Table } from 'antd';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import useApollo from '../../hooks/useApollo';
+import { ICompany } from '../../types/company.interface';
+import { companyTableColumns } from '../../constants/tableColumns';
 
-const columns = [
-  {
-    title: 'Company Name',
-    dataIndex: 'name',
-    key: 'name',
-  },
-  {
-    title: 'Legal Number',
-    dataIndex: 'legalNo',
-    key: 'legalNo',
-  },
-  {
-    title: 'Incorporation Country',
-    dataIndex: 'incorporation',
-    key: 'incorporation',
-  },
-  {
-    title: 'Website',
-    dataIndex: 'website',
-    key: 'website',
-  },
-  {
-    title: 'Edit',
-    dataIndex: 'edit',
-    key: 'edit',
-  },
-  {
-    title: 'Delete',
-    dataIndex: 'delete',
-    key: 'delete',
-  },
-];
+interface ITableCompany extends ICompany {
+  key: string;
+  delete: JSX.Element;
+}
 
 const Companies = () => {
   const navigate = useNavigate();
-  const { QueryRequest } = useApollo();
+  const { QueryRequest, MutationRequest } = useApollo();
   const [modal, setModal] = useState<{
     show: boolean;
     loading: boolean;
   }>({ show: false, loading: false });
-  const [search, setSearch] = useState<string>('');
-  const [data, setData] = useState<Array<{
-    key: string;
+  const [fields, setFields] = useState<{
     name: string;
     legalNo: number;
-    incorporation: string;
+    incorporationCountry: string;
     website: string;
-    edit: JSX.Element;
-    delete: JSX.Element;
-  }>>([
-    {
-      key: '1',
-      name: 'OPS',
-      legalNo: 32,
-      incorporation: 'Isparta',
-      website: 'https://www.ops.com',
-      edit: <Button>Edit</Button>,
-      delete: <Button>Delete</Button>
-    },
-    {
-      key: '2',
-      name: 'Inodea',
-      legalNo: 34,
-      incorporation: 'İstanbul',
-      website: 'https://www.inodea.com',
-      edit: <Button>Edit</Button>,
-      delete: <Button>Delete</Button>,
-    }]);
+  }>({
+    name: "",
+    legalNo: 0,
+    incorporationCountry: "",
+    website: "",
+  });
+  const [search, setSearch] = useState<string>('');
+  const [data, setData] = useState<Array<ITableCompany>>([]);
 
-  const handleFetchCompanies = async () => {
-    // setData([]);
-  }
+  const handleFetchCompanies = useCallback(async () => {
+    await QueryRequest(`query {
+      getMyCompanies{_id name legalNo incorporationCountry website}
+    }`).then(res => {
+      if (res.data.getMyCompanies) {
+        setData(res.data.getMyCompanies.map((elm: ICompany) => ({
+          key: elm._id,
+          name: elm.name,
+          legalNo: elm.legalNo,
+          incorporationCountry: elm.incorporationCountry,
+          website: elm.website,
+          delete: <Button onClick={() => deleteCompany(elm._id)}>Delete</Button>,
+        })));
+      }
+    }).catch(err => console.error("getMyCompanies err: ", err));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     handleFetchCompanies();
     return () => { }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleCreateCompany = async () => {
     setModal(prev => ({ ...prev, loading: true }));
-    // process
+    await MutationRequest(`mutation {
+      createCompany(
+        input: { name: "${fields.name}", legalNo: ${fields.legalNo}, incorporationCountry: "${fields.incorporationCountry}", website: "${fields.website}" }
+      ) {_id name legalNo incorporationCountry website}
+    }`)
+      .then(res => {
+        if (res.data.createCompany?._id) {
+          setData(prev => ([...prev, {
+            _id: res.data.createCompany._id,
+            key: res.data.createCompany._id,
+            name: res.data.createCompany.name,
+            legalNo: res.data.createCompany.legalNo,
+            incorporationCountry: res.data.createCompany.incorporationCountry,
+            website: res.data.createCompany.website,
+            delete: <Button onClick={() => deleteCompany(res.data.createCompany._id)}>Delete</Button>,
+          }]))
+        }
+      })
+      .catch(err => console.error("createCompany err: ", err));
     setModal(prev => ({ ...prev, show: false, loading: false }));
+  }
+
+  const deleteCompany = async (companyId: string) => {
+    await MutationRequest(`mutation {
+      deleteCompany(input: { companyId: "${companyId}" })
+    }`)
+      .then(res => res.data.deleteCompany && setData(prev => prev.filter(company => company.key.toLowerCase() !== companyId.toLowerCase())))
+      .catch(err => console.error("deleteCompany err: ", err));
   }
 
   return (
@@ -99,7 +100,7 @@ const Companies = () => {
             <Button onClick={() => setModal(prev => ({ ...prev, show: true }))}>Create New Company</Button>
           </Col>
           <Col span={24}>
-            <Table dataSource={data.filter(elm => elm.name.toUpperCase().includes(search.toUpperCase()))} columns={columns} pagination={{ pageSize: 3 }} />
+            <Table dataSource={data.filter(elm => elm.name.toUpperCase().includes(search.toUpperCase()))} columns={companyTableColumns} pagination={{ pageSize: 3 }} scroll={{ x: true }} />
           </Col>
           <Col span={24}>
             <CustomButton bgColor="darkgreen" name="Back" type="button" onClick={() => navigate('/dashboard')} />
@@ -117,16 +118,24 @@ const Companies = () => {
       >
         <Row gutter={[12, 12]}>
           <Col span={24}>
-            <Input addonBefore="Name" />
+            <Input addonBefore="Name"
+              value={fields.name}
+              onChange={(e) => setFields(prev => ({ ...prev, name: e.target.value }))} />
           </Col>
           <Col span={24}>
-            <Input addonBefore="Legal Number" />
+            <Input addonBefore="Legal Number" type='number'
+              value={fields.legalNo}
+              onChange={(e) => setFields(prev => ({ ...prev, legalNo: Number(e.target.value) }))} />
           </Col>
           <Col span={24}>
-            <Input addonBefore="Incorporation Country" />
+            <Input addonBefore="Incorporation Country"
+              value={fields.incorporationCountry}
+              onChange={(e) => setFields(prev => ({ ...prev, incorporationCountry: e.target.value }))} />
           </Col>
           <Col span={24}>
-            <Input addonBefore="Website" />
+            <Input addonBefore="Website"
+              value={fields.website}
+              onChange={(e) => setFields(prev => ({ ...prev, website: e.target.value }))} />
           </Col>
         </Row>
       </Modal>

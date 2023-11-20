@@ -1,0 +1,30 @@
+type Product {
+  _id: String!
+  owner: String!
+  name: String!
+  category: String!
+  amount: Float!
+  unit: String!
+  company: String!
+}
+
+input CreateProductInput {
+  name: String!
+  category: String!
+  amount: Float!
+  unit: String!
+  company: String!
+}
+
+input DeleteProductInput {
+  productId: String!
+}
+
+type Query {
+  getMyProducts: [Product]
+}
+
+type Mutation {
+  createProduct(input: CreateProductInput!): Product
+  deleteProduct(input: DeleteProductInput!): Product
+}

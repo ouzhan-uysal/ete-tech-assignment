@@ -8,12 +8,12 @@ const httpLink = createHttpLink({
 
 const authLink = setContext((_, { headers }) => {
   // get the authentication token from local storage if it exists
-  const storagedRefreshToken = Cookies.get('ete_token');
+  const jwt = Cookies.get('ete-token');
   // return the headers to the context so httpLink can read them
   return {
     headers: {
       ...headers,
-      authorization: storagedRefreshToken ? `Bearer ${storagedRefreshToken}` : '',
+      authorization: jwt ? `Bearer ${jwt}` : '',
     },
   };
 });
