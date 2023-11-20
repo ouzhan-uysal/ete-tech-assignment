@@ -1,13 +1,15 @@
 import { ChangeEvent, useReducer } from "react";
-import { ApiRequest } from "../../../api";
+import { useTranslation } from "react-i18next";
 import CustomButton from "../../../components/custom/Button";
 import CustomInput from "../../../components/custom/Input";
 import { SignupActions, SignupReducer } from "../../../reducers/signup.reducer";
-import { useTranslation } from "react-i18next";
 import { useAuth } from "../../../contexts/AuthContext";
+import useApollo from "../../../hooks/useApollo";
+import { jwtDecode } from "jwt-decode";
 
 const SignupTab = () => {
   const { handleLogin } = useAuth();
+  const { MutationRequest } = useApollo();
   const { t } = useTranslation();
   const [state, dispatch] = useReducer(SignupReducer, {
     email: "",
@@ -40,16 +42,24 @@ const SignupTab = () => {
   }
 
   const handleRegister = async () => {
-    await ApiRequest.signup({
-      fullName: state.fullName,
-      email: state.email,
-      password: state.password
-    }).then(res => {
-      handleLogin({
-        email: res.email,
-        fullName: res.fullName,
-      })
-    }).catch(err => console.error(err));
+    await MutationRequest(`
+      mutation { 
+        signup(input: { username: "test", email: "test@gmail.com", password: "test" }) {
+          access_token
+        }
+      }
+    `).then(res => {
+      if (res.data.signup.access_token) {
+        const decodedJwt: any = jwtDecode(res.data.signup.access_token);
+        if (typeof decodedJwt === 'object') {
+          handleLogin({
+            email: decodedJwt.email,
+            fullName: decodedJwt.username,
+            access_token: res.data.signup.access_token
+          });
+        }
+      }
+    }).catch(err => console.error("signup err: ", err));
   }
 
   return (

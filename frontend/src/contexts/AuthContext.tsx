@@ -20,6 +20,7 @@ export const AuthContextProvider: FC<IAuthContextProvider> = ({ children }) => {
 
   const handleLogin = async (user: IUser) => {
     setUser(user);
+    Cookies.set("ete-token", user.access_token);
     navigate('/home');
   };
 
@@ -31,7 +32,7 @@ export const AuthContextProvider: FC<IAuthContextProvider> = ({ children }) => {
   const handleCheckUser = useCallback(async () => {
     const storegedToken = Cookies.get('ete-token');
     if (user) {
-      // Cookies.set('ete-token', user.access_token);
+      Cookies.set('ete-token', user.access_token);
     } else if (storegedToken && storegedToken !== 'undefined') {
       // await QueryRequest(`query {
       // 	jwtCheck {

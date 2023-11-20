@@ -13,4 +13,5 @@ export interface IAuthContextProvider {
 export interface IUser {
   fullName: string;
   email: string;
+  access_token: string;
 }

@@ -24,7 +24,7 @@ export class UserResolver {
     if (!(await bcrypt.compare(input.password, user.password))) {
       throw new BadRequestException('Invalid Credentials!');
     }
-    return { access_token: this.userService.createAccessToken(user) };
+    return this.userService.createAccessToken(user);
   };
 
   @Mutation()
@@ -36,6 +36,7 @@ export class UserResolver {
       email: input.email,
       password: hashedPassword,
     });
-    return await this.userService.createUser(user);
+    const createdUser = await this.userService.createUser(user);
+    return this.userService.createAccessToken(createdUser);
   }
 }

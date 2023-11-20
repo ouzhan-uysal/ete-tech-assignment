@@ -11,8 +11,8 @@ export class UserService {
     private userRepository: MongoRepository<User>
   ) { }
 
-  createAccessToken(user: User): string {
-    return jwt.sign({ ...user }, process.env.SECRET_KEY);
+  createAccessToken(user: User): { access_token: string } {
+    return { access_token: jwt.sign({ ...user }, process.env.SECRET_KEY) };
   };
 
   async getUserByEmail(email: string): Promise<User> {
